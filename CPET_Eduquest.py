@@ -16,7 +16,7 @@ while True:
     else:
         print('Invalid choice. Please try again.')
 
-# Define the dictionary of banned words
+# ADD BANNED WORDS HERE
 banned_words = {
     "word_1": "fox",
     "word_2": "is",
