@@ -1,0 +1,99 @@
+#Trial 3
+import random
+
+# Initial UI options
+ui_choices = ["Play", "Menu", "Options", "Exit"]
+
+print("\nWelcome to EduQuest! Where it's fun learning")
+
+# Main menu loop
+while True:
+    user_answer = str(input("Choose one of the following options: Play, Menu, Options: ")).capitalize()
+    
+    if user_answer == "Play":
+        print("Wonderful! \nGame Starting....")
+        break
+    elif user_answer in ["Menu", "Options"]:
+        print(f"You chose {user_answer}.")
+        break
+    else:
+        print('Invalid choice. Please try again.')
+
+# Set of banned words
+banned_words = { 
+    "the", "is", "are", "on", "in", "at", "she", "he", "a", "an", "or", "for",
+    "that", "this", "by", "was", "were", "they", "their", "there", "be", "with",
+    "to", "from", "and", "but", "so", "yet", "i", "you", "it", "we", "have", 
+    "has", "do", "can", "will", "said"
+}
+
+# Function to split a sentence into words and store them in a dictionary
+def store_sentence_in_dict(sentence):
+    global words
+    global No_no_words
+
+    # Split the sentence into words and convert to lowercase
+    words = sentence.lower().split()
+
+    # Filter out banned words silently (no print statements)
+    No_no_words = [word for word in words if word not in banned_words]
+
+    # Create a dictionary to store the words
+    word_dict = {}
+    for i, word in enumerate(words):
+        word_dict[f"word_{i+1}"] = word
+    
+    return word_dict
+
+# Get the sentence from the user and store in dictionary
+sentence = input("Enter a sentence: ")
+word_dict = store_sentence_in_dict(sentence)
+
+# Check if there are eligible words and continue with the game
+if No_no_words:
+    # Ask the user how many words they want to blank out
+    num_words_to_blank = int(input("How many words do you wish to blank out? "))
+    
+    # Ensure the user does not choose more words than are available
+    number_of_words_chosen = min(num_words_to_blank, len(No_no_words))
+
+    # Randomly choose words to blank from eligible words
+    selected_words = random.sample(No_no_words, number_of_words_chosen)
+    
+    # Create a modified version of the sentence with blanked words
+    modified_sentence = words.copy()
+    for word in selected_words:
+        for i in range(len(modified_sentence)):
+            if modified_sentence[i] == word:
+                modified_sentence[i] = "_____"
+                break  # Replace only the first occurrence of each word
+
+    # Join the modified sentence back into a string
+    modified = ' '.join(modified_sentence)
+    print(f"Guess the missing word(s):\n{modified}")
+
+    # Set the number of attempts(health)
+    health = 3  # You can change this number to allow more or fewer attempts
+
+    # Collect user guesses
+    correct_guesses = set(selected_words)
+    user_guesses = set()
+
+    while health > 0 and user_guesses != correct_guesses:
+        guess = input(f'You have {health} HP left. Enter your guess here: ').lower()
+        
+        if guess in correct_guesses:
+            print(f'Correct! You guessed: {guess}')
+            user_guesses.add(guess)
+        else:
+            print('Incorrect guess. Try again.')
+            health -= 1  # Only decrement health for incorrect guesses
+
+    # Check if the user guessed all words
+    if user_guesses == correct_guesses:
+        print('Congratulations! You guessed all the words correctly!')
+    else:
+        print('Ohhh no! You ran out of HP. The correct words were:', ', '.join(selected_words))
+
+else:
+    print("No eligible words to guess.")
