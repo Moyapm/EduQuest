@@ -1,10 +1,6 @@
 import os
+import time
 import random
-
-def clear_screen():
-    # Check the OS and execute the appropriate command
-    if os.name == 'nt':
-        os.system('cls')
 
 # Initial UI options
 ui_choices = ["Play", "Menu", "Options", "Exit"]
@@ -17,6 +13,7 @@ while True:
 
     if user_answer == "Play":
         print("Wonderful! \nGame Starting....")
+        time.sleep(1)  # Small delay before starting
         break
     elif user_answer in ["Menu", "Options"]:
         print(f"You chose {user_answer}.")
@@ -24,15 +21,22 @@ while True:
     else:
         print('Invalid choice. Please try again.')
 
+# Clear screen function
+def clear_screen():
+    if os.name == 'nt':  # For Windows
+        os.system('cls')
+    else:  # For macOS and Linux
+        os.system('clear')
+
 # Dictionary of banned words
 banned_words = {
     "the", "is", "are", "on", "in", "at", "she", "he", "a", "an", "or", "for",
     "that", "this", "by", "was", "were", "they", "their", "there", "be", "with",
-    "to", "from", "and", "but", "so", "yet", "I", "you", "it", "we", "have", 
+    "to", "from", "and", "but", "so", "yet", "i", "you", "it", "we", "have", 
     "has", "do", "can", "will", "said", ","
 }
 
-# Function to split a sentence into words and store them in a dictionary
+# Function to split a sentence into words and filter out banned words
 def store_sentence_in_dict(sentence):
     global words
     global No_no_words
@@ -40,7 +44,7 @@ def store_sentence_in_dict(sentence):
     # Split the sentence into words and convert to lowercase
     words = sentence.lower().split()
 
-    # Filter out banned words silently (no print statements)
+    # Filter out banned words
     No_no_words = [word for word in words if word not in banned_words]
 
     # Create a dictionary to store the words
@@ -50,9 +54,11 @@ def store_sentence_in_dict(sentence):
     
     return word_dict
 
+# Function to display the sentence
 def display_sentence(sentence):
     return ' '.join(sentence)
 
+# Main game function
 def play_game():
     health = 5
     correct_streak = 0
@@ -70,7 +76,7 @@ def play_game():
     num_words_to_blank = int(input(f"How many words do you wish to blank out? (Max: {len(No_no_words)}) "))
     num_words_to_blank = min(num_words_to_blank, len(No_no_words))
 
-    # Randomly choose words to blank from the user input ignoring banned words
+    # Randomly choose words to blank out
     selected_words = random.sample(No_no_words, num_words_to_blank)
 
     # Create a modified sentence with blanks
@@ -78,16 +84,17 @@ def play_game():
     for word in selected_words:
         for i in range(len(modified_sentence)):
             if modified_sentence[i] == word:
-                modified_sentence[i] = "_____"
+                modified_sentence[i] = "______"
                 break  # Replace only the first occurrence
 
     guessed_words = set()
     blanks = {word: word for word in selected_words}
 
+    # Game loop
     while blanks and health > 0:
         # Clear the screen before showing the updated sentence and health
         clear_screen()
-        
+
         print("\nGuess the missing words:")
         print(display_sentence(modified_sentence))
         print(f"Health remaining: {health}")
@@ -96,32 +103,26 @@ def play_game():
 
         if guess in guessed_words:
             print("You already guessed that word. Try another one.")
+            time.sleep(1)  # Small delay to allow the player to see the message
             continue
 
         guessed_words.add(guess)
 
-        correct = False
-        indices_correct = []
-        for word in list(blanks.values()):
-            if guess == word.lower():
-                # Fill in the correct word in the modified sentence
-                for idx in range(len(modified_sentence)):
-                    if modified_sentence[idx] == "_____":
-                        modified_sentence[idx] = word
-                        indices_correct.append(word)
-                        correct = True
-                        break
-
-        if correct:
+        if guess in blanks:
             print("Correct!")
+            # Fill in the correct word in the modified sentence
+            for idx in range(len(modified_sentence)):
+                if modified_sentence[idx] == "______" and blanks[guess] == guess:
+                    modified_sentence[idx] = guess
+                    break
+            del blanks[guess]
             correct_streak += 1
-            for word in indices_correct:
-                del blanks[word]
         else:
             health -= 1
             wrong_answers += 1
             correct_streak = 0
             print(f"Incorrect! You lose a health point. Health remaining: {health}")
+            time.sleep(1)  # Short delay before clearing to show feedback
 
     # Game summary
     clear_screen()
@@ -135,5 +136,6 @@ def play_game():
     else:
         print("\nGame Over! You've run out of health.")
 
+# Run the game
 if __name__ == "__main__":
     play_game()
